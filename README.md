@@ -5,6 +5,7 @@ S10 - EA1 - Carga y Creación de Dataset
 # Integrantes
 
 Natalia Jadith Catro Ospino
+
 Oscar Luis Marquez Arrieta
 
 
