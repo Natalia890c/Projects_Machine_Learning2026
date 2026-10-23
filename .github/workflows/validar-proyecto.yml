@@ -1,0 +1,28 @@
+name: Validación del proyecto EA1
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descarga del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configuración de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Instalar dependencias
+        run: python -m pip install -r requirements.txt
+
+      - name: Verificar la importación de las clases
+        run: |
+          PYTHONPATH=src python -c "from clases.hf_loader import HFDatasetLoader; from clases.reportes import Reportes; print('Clases importadas correctamente')"
