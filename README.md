@@ -2,13 +2,14 @@
 
 S10 - EA1 - Carga y Creación de Dataset
 
-Integrantes
+# Integrantes
 
-Natalia Judith Catro Ospino
+Natalia Jadith Castro Ospino
+
 Oscar Luis Marquez Arrieta
 
 
-Comandos Utilizados 
+# Comandos Utilizados 
 
 python -m venv .venv
 source .venv/bin/activate -> Activar entorno virtual
