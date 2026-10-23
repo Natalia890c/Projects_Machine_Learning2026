@@ -3,3 +3,4 @@ pandas==3.1.0
 matplotlib==3.9.4
 ipykernel==6.29.5
 datasets
+jupyter
