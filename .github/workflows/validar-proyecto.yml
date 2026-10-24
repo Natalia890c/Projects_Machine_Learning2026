@@ -63,18 +63,26 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+
       - name: Guardar resultados automáticamente
+        if: github.event_name != 'pull_request'
         run: |
-          git add Sincronizar/datos/ Sincronizar/reportes/
+          git add -A -- Sincronizar/
+
+          echo "Archivos preparados para guardar:"
+          git diff --cached --name-status
 
           if git diff --cached --quiet; then
-            echo "No hay resultados nuevos para guardar."
+            echo "No hay cambios nuevos para guardar."
             exit 0
           fi
 
-          git commit -m "chore: actualizar resultados [skip ci]"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git commit -m "chore: actualizar resultados de Semana 1 [skip ci]"
 
           git fetch origin main
           git rebase origin/main
-
           git push origin HEAD:main
+
