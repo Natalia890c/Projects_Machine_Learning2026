@@ -1,3 +1,4 @@
+
 name: Validación del proyecto EA1
 
 on:
@@ -7,22 +8,58 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   validar:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descarga del repositorio
+      - name: Descargar repositorio
         uses: actions/checkout@v4
+        with:
+          ref: main
 
-      - name: Configuración de Python
+      - name: Configurar Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+          cache: pip
 
       - name: Instalar dependencias
-        run: python -m pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install nbconvert ipykernel
 
-      - name: Verificar la importación de las clases
+      - name: Verificar importaciones
         run: |
           PYTHONPATH=src python -c "from clases.hf_loader import HFDatasetLoader; from clases.reportes import Reportes; print('Clases importadas correctamente')"
+
+      - name: Ejecutar notebook EA1
+        if: github.event_name != 'pull_request'
+        run: |
+          jupyter nbconvert \
+            --to notebook \
+            --execute Sincronizar/EA1_Carga_de_Datos.ipynb \
+            --inplace \
+            --ExecutePreprocessor.timeout=1800
+
+      - name: Configurar identidad del bot
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Guardar resultados automáticamente
+        if: github.event_name != 'pull_request'
+        run: |
+          git add -A
+
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: actualizar resultados de Semana 1 [skip ci]"
+            git push origin HEAD:main
+          else
+            echo "No hay cambios nuevos para guardar."
+          fi
