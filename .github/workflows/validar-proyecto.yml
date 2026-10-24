@@ -52,6 +52,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+
       - name: Guardar resultados automáticamente
         if: github.event_name != 'pull_request'
         run: |
@@ -59,7 +60,12 @@ jobs:
 
           if ! git diff --cached --quiet; then
             git commit -m "chore: actualizar resultados de Semana 1 [skip ci]"
+
+            git fetch origin main
+            git rebase origin/main
+
             git push origin HEAD:main
           else
             echo "No hay cambios nuevos para guardar."
           fi
+
