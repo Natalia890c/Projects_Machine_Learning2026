@@ -1,5 +1,5 @@
 
-name: Ejecutar Semana 1
+name: Ejecutar EA1 - Carga de Datos
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: ejecutar-semana-1-main
+  group: ejecutar-ea1-main
   cancel-in-progress: false
 
 jobs:
@@ -29,77 +29,57 @@ jobs:
       - name: Configurar Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
           cache: pip
           cache-dependency-path: requirements.txt
 
-      - name: Crear entorno virtual
-        run: python -m venv .venv
-
       - name: Instalar dependencias
         run: |
-          .venv/bin/python -m pip install --upgrade pip
-          .venv/bin/python -m pip install -r requirements.txt
-          .venv/bin/python -m pip install nbconvert ipykernel pyarrow openpyxl
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install nbconvert ipykernel
+
+      - name: Verificar clases del proyecto
+        run: |
+          PYTHONPATH=src python -c "from clases.hf_loader import HFDatasetLoader; from clases.reportes import Reportes; print('Clases importadas correctamente')"
 
       - name: Preparar carpetas de resultados
         run: |
-          mkdir -p src/sincronicas/datos src/sincronicas/reportes
+          mkdir -p Sincronizar/datos Sincronizar/reportes
 
-      - name: Ejecutar Semana_1SINC.ipynb
-        working-directory: src/sincronicas
+      - name: Ejecutar notebook EA1
+        working-directory: Sincronizar
         run: |
-          ../../.venv/bin/jupyter nbconvert \
+          jupyter nbconvert \
             --to notebook \
             --execute \
-            --inplace \
+            --output /tmp/EA1_Carga_de_Datos_ejecutado.ipynb \
             --ExecutePreprocessor.timeout=1800 \
-            Semana_1SINC.ipynb
+            EA1_Carga_de_Datos.ipynb
 
-      - name: Ejecutar Semana_2SINC.ipynb
-        working-directory: src/sincronicas
+      - name: Buscar reportes generados
         run: |
-          ../../.venv/bin/jupyter nbconvert \
-            --to notebook \
-            --execute \
-            --inplace \
-            --ExecutePreprocessor.timeout=1800 \
-            Semana_2SINC.ipynb
+          echo "Archivos TXT:"
+          find Sincronizar -type f -name "*.txt" -print
 
-      - name: Verificar archivos generados
-        run: |
-          echo "=== Archivos TXT ==="
-          find src/sincronicas -type f -name "*.txt" -print
-
-          echo "=== Datos y reportes ==="
-          find src/sincronicas/datos src/sincronicas/reportes \
-            -type f -print
-
-          TXT_COUNT=$(find src/sincronicas -type f -name "*.txt" | wc -l)
-
-          if [ "$TXT_COUNT" -eq 0 ]; then
-            echo "::error::No se generaron archivos TXT. Revisa el código de los notebooks y sus rutas de salida."
-            exit 1
-          fi
-
-          echo "Se encontraron $TXT_COUNT archivos TXT."
+          echo "Archivos de datos y reportes:"
+          find Sincronizar/datos Sincronizar/reportes -type f -print
 
       - name: Configurar identidad del bot
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Guardar todos los resultados
+      - name: Guardar resultados en GitHub
         run: |
-          git add -A -- src/sincronicas/
+          git add -A -- Sincronizar/datos/ Sincronizar/reportes/
 
           if git diff --cached --quiet; then
-            echo "Los archivos generados no presentan cambios."
+            echo "No hay resultados nuevos para guardar."
             exit 0
           fi
 
-          git commit -m "chore: actualizar resultados [skip ci]"
-
+          git commit -m "chore: actualizar resultados EA1 [skip ci]"
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
